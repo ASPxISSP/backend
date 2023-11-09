@@ -41,9 +41,6 @@ COPY --chown=node:node package*.json ./
 COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node . .
 
-# Generate Prisma
-RUN npx prisma generate --schema ./prisma/schema.prisma
-
 # Run the build command which creates the production bundle
 RUN npm run build
 
@@ -51,7 +48,7 @@ RUN npm run build
 ENV NODE_ENV production
 
 # Running `npm ci` removes the existing node_modules directory and passing in --only=production ensures that only the production dependencies are installed. This ensures that the node_modules directory is as optimized as possible
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci --omit=dev && npm cache clean --force
 
 USER node
 
@@ -61,9 +58,13 @@ USER node
 
 FROM node:20.9-alpine As production
 
+WORKDIR /usr/src/app
+
 # Copy the bundled code from the build stage to the production image
 COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
+COPY --chown=node:node --from=build /usr/src/app/package*.json ./
 COPY --chown=node:node --from=build /usr/src/app/dist ./dist
+COPY --chown=node:node prisma ./prisma/
 
-# Start the server using the production build
-CMD [ "node", "dist/main.js" ]
+# Start the server using the production build and init database
+CMD [  "npm", "run", "start:db:prod" ]
