@@ -5,13 +5,10 @@ import {
     HttpCode,
     HttpStatus,
     UseGuards,
-    Req,
-    Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { JwtAuthGuard } from './guards/jwt.guard';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto } from '../user/dto/create-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
@@ -35,12 +32,5 @@ export class AuthController {
     @Post('/refresh')
     refresh(@Body('refreshToken') refreshToken: string) {
         return this.authService.refresh(refreshToken);
-    }
-
-    @UseGuards(JwtAuthGuard)
-    @HttpCode(HttpStatus.OK)
-    @Get('/profile')
-    profile(@Req() req) {
-        return this.authService.profile(req.user.email);
     }
 }

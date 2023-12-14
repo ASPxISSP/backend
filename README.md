@@ -9,6 +9,7 @@
   - [Running the app](#running-the-app)
   - [API Documentation](#api-documentation)
     - [Auth](#auth)
+    - [User](#user)
 
 ## About
 This is the backend repository for RegGraTer project, made using [Nest](https://github.com/nestjs/nest) framework for TypeScript.
@@ -174,10 +175,110 @@ Authorization: Bearer <access token>
 * **200**
 ```json
 {
-    "id": "08ce3039-1e71-4de2-8b56-1abe5e65ba41",
-    "email": "test4@test.com",
+    "id": "22da87a9-55cd-49fd-9ed1-adb3602b0b01",
+    "email": "test2@test.com",
     "name": "user2",
+    "imageId": 0,
     "score": 0
+}
+```
+
+* **401** - Unauthorized
+```json
+{
+    "error": "Unauthorized",
+    "statusCode": 401
+}
+```
+
+</details>
+
+### User
+
+User resource
+
+<details>
+<summary><strong><code>PUT /user</code></strong></summary>
+
+<br/>
+
+Update user profile
+
+**Headers**
+```
+Authorization: Bearer <access token>
+```
+
+**Response**
+
+* **200**
+```json
+{
+    "id": "22da87a9-55cd-49fd-9ed1-adb3602b0b01",
+    "email": "test1@test.com",
+    "password": "$2b$10$bEnzCbU0y0g7fE0BHxVVm.3aa03.oC5hgJMGlzpiOOGVWqTt49x46",
+    "name": "user2",
+    "score": 0,
+    "imageId": 0,
+    "createdAt": "2023-11-09T11:34:27.742Z",
+    "updatedAt": "2023-12-14T11:11:05.490Z"
+}
+```
+
+* **400** - Bad Request
+```json
+{
+    "message": [
+        <error message>
+    ],
+    "error": "Bad Request",
+    "statusCode": 400
+}
+```
+
+* **401** - Unauthorized
+```json
+{
+    "error": "Unauthorized",
+    "statusCode": 401
+}
+```
+
+</details>
+
+<details>
+<summary><strong><code>GET /user/profile</code></strong></summary>
+
+<br/>
+
+Get user profile
+
+**Headers**
+```
+Authorization: Bearer <access token>
+```
+
+**Response**
+
+* **200**
+```json
+{
+    "id": "22da87a9-55cd-49fd-9ed1-adb3602b0b01",
+    "email": "test2@test.com",
+    "name": "user2",
+    "imageId": 0,
+    "score": 0
+}
+```
+
+* **400** - Bad Request
+```json
+{
+    "message": [
+        <error message>
+    ],
+    "error": "Bad Request",
+    "statusCode": 400
 }
 ```
 

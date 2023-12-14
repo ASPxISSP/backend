@@ -6,19 +6,19 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { UsersService } from '../users/users.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { UserService } from '../user/user.service';
+import { CreateUserDto } from '../user/dto/create-user.dto';
 import { Tokens } from './types/tokens.type';
 
 @Injectable()
 export class AuthService {
     constructor(
-        private readonly userService: UsersService,
+        private readonly userService: UserService,
         private readonly jwtService: JwtService,
     ) {}
 
-    async generateTokens(userId: string, email: string): Promise<Tokens> {
-        const payload = { email, sub: userId };
+    async generateTokens(id: string, email: string): Promise<Tokens> {
+        const payload = { email, sub: id };
         return {
             accessToken: this.jwtService.sign(payload),
             refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' }),
@@ -26,21 +26,11 @@ export class AuthService {
     }
 
     async validateUser(email: string, password: string): Promise<User> {
-        const user = await this.userService.findOne(email);
+        const user = await this.userService.findByEmail(email);
         if (user && (await bcrypt.compare(password, user.password))) {
             return user;
         }
         return null;
-    }
-
-    async profile(email: string) {
-        const user = await this.userService.findOne(email);
-        if (!user) {
-            throw new UnauthorizedException();
-        }
-
-        const { id, name, score } = user;
-        return { id, email, name, score };
     }
 
     async login(email: string, password: string): Promise<Tokens> {
@@ -52,7 +42,7 @@ export class AuthService {
     }
 
     async register(user: CreateUserDto) {
-        const existingUser = await this.userService.findOne(user.email);
+        const existingUser = await this.userService.findById(user.email);
         if (existingUser) {
             throw new BadRequestException('User already exists');
         }
@@ -72,7 +62,7 @@ export class AuthService {
         }
         try {
             const payload = this.jwtService.verify(refreshToken);
-            const user = await this.userService.findOne(payload.email);
+            const user = await this.userService.findByEmail(payload.email);
             if (!user) {
                 throw new UnauthorizedException();
             }
