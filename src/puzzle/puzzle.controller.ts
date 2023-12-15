@@ -31,7 +31,8 @@ export class PuzzleController {
     @Get()
     @HttpCode(HttpStatus.OK)
     findMany(@Query(ValidationPipe) query: FindManyQueryDto) {
-        return this.puzzleService.findMany(query.page, query.size, query.city);
+        const { page, size, city } = query;
+        return this.puzzleService.findMany(page, size, city);
     }
 
     @Post(':id/solve')

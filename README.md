@@ -11,6 +11,7 @@
     - [Auth](#auth)
     - [User](#user)
     - [Puzzle](#puzzle)
+    - [Leaderboard](#leaderboard)
 
 ## About
 This is the backend repository for RegGraTer project, made using [Nest](https://github.com/nestjs/nest) framework for TypeScript.
@@ -487,6 +488,40 @@ Authorization: Bearer <access token>
     "message": "Conflict",
     "statusCode": 409
 }
+```
+
+</details>
+
+### Leaderboard
+
+<details>
+<summary><strong><code>GET /leaderboard</code></strong></summary>
+
+<br/>
+
+Get leaderboard list
+
+**Query**
+
+* `size` - int, 1-100 (default 10)
+* `city` - string, (default empty)
+
+**Response**
+
+* **200**
+```json
+[
+    {
+        "id": "d01fc20c-a754-40e6-9af9-85b24366a445",
+        "name": "user2",
+        "score": 20
+    },
+    {
+        "id": "08ce3039-1e71-4de2-8b56-1abe5e65ba41",
+        "name": "user3",
+        "score": 0
+    }
+]
 ```
 
 </details>
