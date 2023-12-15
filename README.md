@@ -10,6 +10,7 @@
   - [API Documentation](#api-documentation)
     - [Auth](#auth)
     - [User](#user)
+    - [Puzzle](#puzzle)
 
 ## About
 This is the backend repository for RegGraTer project, made using [Nest](https://github.com/nestjs/nest) framework for TypeScript.
@@ -287,6 +288,204 @@ Authorization: Bearer <access token>
 {
     "error": "Unauthorized",
     "statusCode": 401
+}
+```
+
+</details>
+
+
+<details>
+<summary><strong><code>DELETE /user</code></strong></summary>
+
+<br/>
+
+Delete user
+
+**Headers**
+```
+Authorization: Bearer <access token>
+```
+
+**Response**
+
+* **204**
+
+
+* **400** - Bad Request
+```json
+{
+    "message": [
+        <error message>
+    ],
+    "error": "Bad Request",
+    "statusCode": 400
+}
+```
+
+* **401** - Unauthorized
+```json
+{
+    "error": "Unauthorized",
+    "statusCode": 401
+}
+```
+
+</details>
+
+### Puzzle
+
+Puzzle resource
+
+<details>
+<summary><strong><code>GET /puzzle/:id</code></strong></summary>
+
+<br/>
+
+Get puzzle
+
+**Params**
+
+* `id` - int
+
+**Response**
+
+* **200**
+```json
+{
+    "id": 1,
+    "solution": "solution",
+    "difficulty": "MEDIUM",
+    "latitude": 51.110252,
+    "longitude": 17.030915,
+    "address": "Rynek",
+    "city": "Wrocław",
+    "imageUri": "s3://bucket/image"
+}
+```
+
+* **400** - Bad Request
+```json
+{
+    "message": [
+        <error message>
+    ],
+    "error": "Bad Request",
+    "statusCode": 400
+}
+```
+
+</details>
+
+<details>
+<summary><strong><code>GET /puzzle</code></strong></summary>
+
+<br/>
+
+Get list of puzzles
+
+**Query params**
+
+* `size` - int, 1-100 (default 10)
+* `page` - int, min 1 (default 1)
+* `city` - string (default empty)
+
+**Response**
+
+* **200**
+```json
+{
+    "data": [
+        {
+            "id": 1,
+            "solution": "solution",
+            "difficulty": "MEDIUM",
+            "latitude": 51.110252,
+            "longitude": 17.030915,
+            "address": "Rynek 13, 50-003 Wrocław",
+            "city": "Wrocław",
+            "imageUri": "s3://bucket/image"
+        },
+        ...
+    ],
+    "meta": {
+        "page": 1,
+        "size": 10,
+        "total": 1
+    }
+}
+```
+
+* **400** - Bad Request
+```json
+{
+    "message": [
+        <error message>
+    ],
+    "error": "Bad Request",
+    "statusCode": 400
+}
+```
+
+</details>
+
+<details>
+<summary><strong><code>POST /puzzle/:id/solve</code></strong></summary>
+
+<br/>
+
+Solve a puzzle
+
+**Headers**
+```
+Authorization: Bearer <access token>
+```
+
+**Params**
+
+* `id` - int
+
+**Body**
+```json
+{
+    "solution": "solution",
+    "latitude": 51.110316,
+    "longitude": 17.030929
+}
+```
+
+**Response**
+
+* **204**
+```json
+{
+    "score": 20
+}
+```
+
+* **400** - Bad Request
+```json
+{
+    "message": [
+        <error message>
+    ],
+    "error": "Bad Request",
+    "statusCode": 400
+}
+```
+
+* **401** - Unauthorized
+```json
+{
+    "message": "Unauthorized",
+    "statusCode": 401
+}
+```
+
+* **409** - Conflict
+```json
+{
+    "message": "Conflict",
+    "statusCode": 409
 }
 ```
 

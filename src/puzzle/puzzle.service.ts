@@ -1,18 +1,45 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+    Injectable,
+    BadRequestException,
+    NotFoundException,
+    InternalServerErrorException,
+    ConflictException,
+} from '@nestjs/common';
+import { Prisma, Puzzle } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { FindManyResponseDto } from './dto/find-many';
-import { Puzzle } from '@prisma/client';
+import { FindManyResponseDto } from './dto/find-many.dto';
+import { PuzzleSolutionDto } from './dto/puzzle-solution.dto';
+import { isWithinRadius } from 'src/helpers/isWithinRadius';
+import { puzzleScore } from 'src/constants/puzzle-score';
 
 @Injectable()
 export class PuzzleService {
     constructor(private readonly prisma: PrismaService) {}
 
-    async findOne(id: string): Promise<Puzzle> {
-        return this.prisma.puzzle.findUnique({
-            where: {
-                id,
-            },
-        });
+    async findOne(id: number): Promise<Puzzle> {
+        try {
+            const puzzle = await this.prisma.puzzle.findUnique({
+                where: {
+                    id,
+                },
+            });
+            if (!puzzle) {
+                throw new NotFoundException();
+            }
+            return puzzle;
+        } catch (err) {
+            if (err instanceof NotFoundException) {
+                throw err;
+            }
+            if (
+                err instanceof Prisma.PrismaClientKnownRequestError ||
+                err instanceof Prisma.PrismaClientValidationError
+            ) {
+                throw new BadRequestException();
+            }
+            console.log(err);
+            throw new InternalServerErrorException();
+        }
     }
 
     async findMany(
@@ -21,18 +48,20 @@ export class PuzzleService {
         city?: string,
     ): Promise<FindManyResponseDto> {
         try {
-            const puzzles = await this.prisma.puzzle.findMany({
-                take: size,
-                skip: (page - 1) * size,
-                where: {
-                    ...(city ? { city } : {}),
-                },
-            });
-            const total = await this.prisma.puzzle.count({
-                where: {
-                    ...(city ? { city } : {}),
-                },
-            });
+            const [puzzles, total] = await this.prisma.$transaction([
+                this.prisma.puzzle.findMany({
+                    take: size,
+                    skip: (page - 1) * size,
+                    where: {
+                        ...(city ? { city } : {}),
+                    },
+                }),
+                this.prisma.puzzle.count({
+                    where: {
+                        ...(city ? { city } : {}),
+                    },
+                }),
+            ]);
 
             return {
                 data: puzzles,
@@ -42,6 +71,85 @@ export class PuzzleService {
                     total,
                     ...(city ? { city } : {}),
                 },
+            };
+        } catch (err) {
+            if (err instanceof Prisma.PrismaClientKnownRequestError) {
+                throw new BadRequestException();
+            }
+            console.log(err);
+            throw new InternalServerErrorException();
+        }
+    }
+
+    async solvePuzzle(
+        userId: string,
+        puzzleId: number,
+        puzzleSolutionDto: PuzzleSolutionDto,
+    ): Promise<{ score: number }> {
+        const { solution, latitude, longitude } = puzzleSolutionDto;
+
+        const puzzle = await this.prisma.puzzle.findUnique({
+            where: {
+                id: puzzleId,
+            },
+        });
+
+        const user = await this.prisma.user.findUnique({
+            where: {
+                id: userId,
+            },
+        });
+
+        if (!puzzle || !user) {
+            throw new NotFoundException();
+        }
+
+        const inRadius = isWithinRadius(
+            puzzle.latitude,
+            puzzle.longitude,
+            latitude,
+            longitude,
+            100,
+        );
+
+        const isCorrect = puzzle.solution === solution;
+
+        if (!isCorrect || !inRadius) {
+            throw new BadRequestException();
+        }
+
+        const hasSolved = await this.prisma.puzzleSolve.findFirst({
+            where: {
+                userId,
+                puzzleId,
+            },
+        });
+
+        if (hasSolved) {
+            throw new ConflictException();
+        }
+        try {
+            await this.prisma.$transaction([
+                this.prisma.puzzleSolve.create({
+                    data: {
+                        puzzleId,
+                        userId,
+                    },
+                }),
+                this.prisma.user.update({
+                    where: {
+                        id: userId,
+                    },
+                    data: {
+                        score: {
+                            increment: puzzleScore(puzzle.difficulty),
+                        },
+                    },
+                }),
+            ]);
+
+            return {
+                score: puzzleScore(puzzle.difficulty),
             };
         } catch (err) {
             console.log(err);
