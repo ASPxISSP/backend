@@ -161,41 +161,6 @@ Refresh access token
 
 </details>
 
-<details>
-<summary><strong><code>GET /auth/profile</code></strong></summary>
-
-<br/>
-
-Get user profile
-
-**Headers**
-```
-Authorization: Bearer <access token>
-```
-
-**Response**
-
-* **200**
-```json
-{
-    "id": "22da87a9-55cd-49fd-9ed1-adb3602b0b01",
-    "email": "test2@test.com",
-    "name": "user2",
-    "imageId": 0,
-    "score": 0
-}
-```
-
-* **401** - Unauthorized
-```json
-{
-    "error": "Unauthorized",
-    "statusCode": 401
-}
-```
-
-</details>
-
 ### User
 
 User resource
@@ -516,12 +481,14 @@ Get leaderboard list
     {
         "id": "d01fc20c-a754-40e6-9af9-85b24366a445",
         "name": "user2",
-        "score": 20
+        "score": 20,
+        "imageId": 0
     },
     {
         "id": "08ce3039-1e71-4de2-8b56-1abe5e65ba41",
-        "name": "user3",
-        "score": 0
+        "name": "user2",
+        "score": 0,
+        "imageId": 0
     }
 ]
 ```
