@@ -61,6 +61,7 @@ Register new user
     "email": "email@example.com",
     "password": "passwd!1",
     "name": "Magical User",
+    "imageId": 1
 }
 ```
 
@@ -438,6 +439,7 @@ Solve a puzzle
 
 **Headers**
 ```
+Content-Type: application/json
 Authorization: Bearer <access token>
 ```
 

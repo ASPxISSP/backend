@@ -6,8 +6,8 @@ export class LeaderboardDto {
     score: number;
 
     constructor(partialUser: Partial<User>) {
-        this.id = ''; // Initialize or handle ID as required
-        this.name = partialUser.name || ''; // Assuming 'name' is a property in your User model
-        this.score = 0; // Initialize score as needed
+        this.id = partialUser.id || '';
+        this.name = partialUser.name || '';
+        this.score = partialUser.score || 0;
     }
 }
