@@ -19,7 +19,7 @@ import { UserModule } from 'src/user/user.module';
                 secret: configService.get<string>('JWT_SECRET'),
                 signOptions: {
                     expiresIn: configService.get<string>(
-                        'REFRESH_TOKEN_EXPIRATION',
+                        'ACCESS_TOKEN_EXPIRATION',
                     ),
                 },
                 ignoreExpiration: true, // remove in prod

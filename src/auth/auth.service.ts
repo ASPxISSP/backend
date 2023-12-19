@@ -9,19 +9,25 @@ import * as bcrypt from 'bcrypt';
 import { UserService } from '../user/user.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { Tokens } from './types/tokens.type';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly userService: UserService,
         private readonly jwtService: JwtService,
+        private readonly configService: ConfigService,
     ) {}
 
     async generateTokens(id: string, email: string): Promise<Tokens> {
         const payload = { email, sub: id };
         return {
             accessToken: this.jwtService.sign(payload),
-            refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' }),
+            refreshToken: this.jwtService.sign(payload, {
+                expiresIn: this.configService.get<string>(
+                    'REFRESH_TOKEN_EXPIRATION',
+                ),
+            }),
         };
     }
 
