@@ -18,12 +18,12 @@ export class LeaderboardService {
                         id: true,
                         name: true,
                         score: true,
-                        imageId: true,
+                        imageUri: true,
                     },
                 });
             } else {
                 return this.prisma.$queryRaw`
-                    SELECT "User"."id", "User"."name", "User"."score", "User"."imageId"
+                    SELECT "User"."id", "User"."name", "User"."score", "User"."imageUri"
                     FROM "User"
                     INNER JOIN "PuzzleSolve" ON "PuzzleSolve"."userId" = "User"."id"
                     INNER JOIN "Puzzle" ON "Puzzle"."id" = "PuzzleSolve"."puzzleId"
