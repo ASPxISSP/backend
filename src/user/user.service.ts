@@ -1,12 +1,14 @@
 import * as bcrypt from 'bcrypt';
 import {
+    ForbiddenException,
     Injectable,
     InternalServerErrorException,
     NotFoundException,
 } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, Puzzle, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserProfileDto } from './dto/profile.dto';
+import { UserPuzzleDto } from './dto/user-puzzle.dto';
 
 @Injectable()
 export class UserService {
@@ -89,13 +91,94 @@ export class UserService {
         if (!user) {
             throw new NotFoundException();
         }
-        const { email, name, imageId, score } = user;
+        const { email, name, imageUri, score } = user;
         return {
             id,
             email,
             name,
-            imageId,
+            imageUri,
             score,
         };
+    }
+
+    async puzzleSolves(
+        id: string,
+        city?: string,
+    ): Promise<Puzzle[] | UserPuzzleDto[]> {
+        const user = await this.findById(id);
+        if (!user) {
+            throw new ForbiddenException();
+        }
+
+        if (!city) {
+            return this.prisma.puzzle.findMany({
+                where: {
+                    PuzzleSolve: {
+                        some: {
+                            userId: id,
+                        },
+                    },
+                },
+                orderBy: {
+                    puzzleOrder: 'asc',
+                },
+            });
+        } else {
+            return this.prisma.$queryRaw`
+                WITH "UserPuzzleSolve" AS(
+                        SELECT
+                            "PuzzleSolve"."puzzleId",
+                            "PuzzleSolve"."userId",
+                            "PuzzleSolve"."id"
+                        FROM
+                            "PuzzleSolve"
+                        WHERE
+                            "PuzzleSolve"."userId" = ${id}
+                    ),
+                    "SolvedPuzzles" AS(
+                        SELECT
+                            "Puzzle".*,
+                            CASE
+                                WHEN "UserPuzzleSolve"."id" IS NULL THEN FALSE
+                                ELSE TRUE
+                            END as "isSolved",
+                            LAG(
+                                CASE
+                                    WHEN "UserPuzzleSolve"."id" IS NULL THEN FALSE
+                                    ELSE TRUE
+                                END,
+                                1,
+                                FALSE
+                            ) OVER(
+                                ORDER BY
+                                    "Puzzle"."puzzleOrder"
+                            ) AS "prev_isSolved"
+                        FROM
+                            "Puzzle"
+                            LEFT JOIN "UserPuzzleSolve" ON "UserPuzzleSolve"."puzzleId" = "Puzzle"."id"
+                        WHERE
+                            "Puzzle"."city" = ${city}
+                    )
+                SELECT
+                    "id",
+                    "solution",
+                    "difficulty",
+                    "latitude",
+                    "longitude",
+                    "address",
+                    "city",
+                    "imageUri",
+                    "puzzleOrder",
+                    CASE
+                        WHEN "isSolved" = FALSE
+                        AND "prev_isSolved" = TRUE THEN TRUE
+                        ELSE "isSolved"
+                    END AS "isUnlocked"
+                FROM
+                    "SolvedPuzzles"
+                ORDER BY
+                    "puzzleOrder" ASC;
+                `;
+        }
     }
 }

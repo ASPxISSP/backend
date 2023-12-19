@@ -6,6 +6,7 @@ import {
     HttpCode,
     HttpStatus,
     Put,
+    Query,
     Req,
     UseGuards,
 } from '@nestjs/common';
@@ -36,5 +37,12 @@ export class UserController {
     @Get('/profile')
     profile(@Req() req) {
         return this.userService.profile(req.user.id);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @HttpCode(HttpStatus.OK)
+    @Get('/puzzles')
+    puzzleSolves(@Req() req, @Query('city') city?: string) {
+        return this.userService.puzzleSolves(req.user.id, city);
     }
 }
