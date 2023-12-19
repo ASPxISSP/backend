@@ -14,7 +14,7 @@ model User {
   password    String
   name        String
   score       Int      @default(0)
-  imageId     Int      @default(0)
+  imageUri    String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   PuzzleSolve PuzzleSolve[]
@@ -29,6 +29,7 @@ model Puzzle {
   address     String
   city        String
   imageUri    String
+  puzzleOrder Int
   PuzzleSolve PuzzleSolve[]
 }
 
