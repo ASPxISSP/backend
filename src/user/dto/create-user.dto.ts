@@ -1,4 +1,4 @@
-import { IsEmail, IsInt, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 export class CreateUserDto {
     @IsEmail()
@@ -13,7 +13,7 @@ export class CreateUserDto {
     @IsNotEmpty({ message: 'Name cannot be empty' })
     name: string;
 
-    @IsInt({ message: 'Image ID must be an integer' })
-    @IsNotEmpty({ message: 'Image ID cannot be empty' })
-    imageId: number;
+    @IsString({ message: 'ImageUri must be a string' })
+    @IsNotEmpty({ message: 'ImageUri cannot be empty' })
+    imageUri: string;
 }
