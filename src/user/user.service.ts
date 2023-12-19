@@ -135,33 +135,20 @@ export class UserService {
                         WHERE
                             "PuzzleSolve"."userId" = ${id}
                     ),
-                    "SolvedPuzzles" AS(
+                    "SolvedPuzzles" AS (
                         SELECT
                             "Puzzle".*,
                             CASE
                                 WHEN "UserPuzzleSolve"."id" IS NULL THEN FALSE
                                 ELSE TRUE
                             END as "isSolved",
-                            LAG(
-                                CASE
-                                    WHEN "UserPuzzleSolve"."id" IS NULL THEN FALSE
-                                    ELSE TRUE
-                                END,
-                                1,
-                                FALSE
-                            ) OVER(
-                                ORDER BY
-                                    "Puzzle"."puzzleOrder"
-                            ) AS "prev_isSolved",
-                            COUNT(CASE
-                                WHEN "UserPuzzleSolve"."id" IS NULL THEN NULL
-                                ELSE 1
-                            END) OVER (ORDER BY "Puzzle"."puzzleOrder") AS "true_count"
-                        FROM
-                            "Puzzle"
-                            LEFT JOIN "UserPuzzleSolve" ON "UserPuzzleSolve"."puzzleId" = "Puzzle"."id"
-                        WHERE
-                            "Puzzle"."city" = ${city}
+                            LAG(CASE
+                                WHEN "UserPuzzleSolve"."id" IS NULL THEN FALSE
+                                ELSE TRUE
+                            END) OVER (ORDER BY "Puzzle"."puzzleOrder") AS "prev_isSolved"
+                        FROM "Puzzle"
+                        LEFT JOIN "UserPuzzleSolve" ON "UserPuzzleSolve"."puzzleId" = "Puzzle"."id"
+                        WHERE "Puzzle"."city" = 'Wrocław'
                     )
                 SELECT
                     "id",
@@ -173,10 +160,11 @@ export class UserService {
                     "city",
                     "imageUri",
                     "puzzleOrder",
+                    "isSolved",
                     CASE
                         WHEN "isSolved" = FALSE
                         AND "prev_isSolved" = TRUE THEN TRUE
-                        WHEN "true_count" = 0 THEN TRUE
+                        -- WHEN "true_count" = 0 THEN TRUE
                         ELSE "isSolved"
                     END AS "isUnlocked"
                 FROM
