@@ -4,6 +4,8 @@ import {
     NotFoundException,
     InternalServerErrorException,
     ConflictException,
+    ForbiddenException,
+    UnprocessableEntityException,
 } from '@nestjs/common';
 import { Prisma, Puzzle } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -93,15 +95,17 @@ export class PuzzleService {
                 id: puzzleId,
             },
         });
+        if (!puzzle) {
+            throw new NotFoundException();
+        }
 
         const user = await this.prisma.user.findUnique({
             where: {
                 id: userId,
             },
         });
-
-        if (!puzzle || !user) {
-            throw new NotFoundException();
+        if (!user) {
+            throw new ForbiddenException();
         }
 
         const inRadius = isWithinRadius(
@@ -115,7 +119,9 @@ export class PuzzleService {
         const isCorrect = puzzle.solution === solution;
 
         if (!isCorrect || !inRadius) {
-            throw new BadRequestException();
+            throw new UnprocessableEntityException(
+                'Invalid solution or location',
+            );
         }
 
         const hasSolved = await this.prisma.puzzleSolve.findFirst({
