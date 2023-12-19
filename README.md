@@ -61,7 +61,7 @@ Register new user
     "email": "email@example.com",
     "password": "passwd!1",
     "name": "Magical User",
-    "imageId": 1
+    "imageUri": "bucket/avatars/avatar.png"
 }
 ```
 
@@ -215,6 +215,44 @@ Authorization: Bearer <access token>
 </details>
 
 <details>
+<summary><strong><code>DELETE /user</code></strong></summary>
+
+<br/>
+
+Delete user
+
+**Headers**
+```
+Authorization: Bearer <access token>
+```
+
+**Response**
+
+* **204**
+
+
+* **400** - Bad Request
+```json
+{
+    "message": [
+        <error message>
+    ],
+    "error": "Bad Request",
+    "statusCode": 400
+}
+```
+
+* **401** - Unauthorized
+```json
+{
+    "error": "Unauthorized",
+    "statusCode": 401
+}
+```
+
+</details>
+
+<details>
 <summary><strong><code>GET /user/profile</code></strong></summary>
 
 <br/>
@@ -260,23 +298,81 @@ Authorization: Bearer <access token>
 
 </details>
 
-
 <details>
-<summary><strong><code>DELETE /user</code></strong></summary>
+<summary><strong><code>GET /user/puzzle</code></strong></summary>
 
 <br/>
 
-Delete user
+Get user puzzles
 
 **Headers**
 ```
 Authorization: Bearer <access token>
 ```
 
+**Query params**
+* `city` - string, (default empty). If present, will return all puzzles from given city with additional PuzzleSolve props
+
 **Response**
 
-* **204**
+* **200** - /user/puzzles
+```json
+[
+    {
+        "id": 1,
+        "solution": "prisma",
+        "difficulty": "MEDIUM",
+        "latitude": 51,
+        "longitude": 67,
+        "address": "ul. Nożownicza 13, Wrocław",
+        "city": "Wrocław",
+        "imageUri": "prisma-erd.svg",
+        "puzzleOrder": 1
+    }
+]
+```
 
+* **200** - /user/puzzles?city=Wrocław
+```json
+[
+    {
+        "id": 1,
+        "solution": "prisma",
+        "difficulty": "MEDIUM",
+        "latitude": 51,
+        "longitude": 67,
+        "address": "ul. Nożownicza 13, Wrocław",
+        "city": "Wrocław",
+        "imageUri": "prisma-erd.svg",
+        "puzzleOrder": 1,
+        "isUnlocked": true
+    },
+    {
+        "id": 2,
+        "solution": "adios",
+        "difficulty": "HARD",
+        "latitude": 50,
+        "longitude": 61,
+        "address": "ul. Kuźnicza 10, Wrocław",
+        "city": "Wrocław",
+        "imageUri": "adios.png",
+        "puzzleOrder": 2,
+        "isUnlocked": true
+    },
+    {
+        "id": 3,
+        "solution": "rynek",
+        "difficulty": "HARD",
+        "latitude": 51.11,
+        "longitude": 67.01,
+        "address": "Rynek 7, Wrocław",
+        "city": "Wrocław",
+        "imageUri": "rynek.svg",
+        "puzzleOrder": 3,
+        "isUnlocked": false
+    }
+]
+```
 
 * **400** - Bad Request
 ```json
@@ -370,7 +466,7 @@ Get list of puzzles
             "longitude": 17.030915,
             "address": "Rynek 13, 50-003 Wrocław",
             "city": "Wrocław",
-            "imageUri": "s3://bucket/image"
+            "imageUri": "image.svg"
         },
         ...
     ],
@@ -449,11 +545,12 @@ Authorization: Bearer <access token>
 }
 ```
 
-* **409** - Conflict
+* **422** - Unprocessable Entity 
 ```json
 {
-    "message": "Conflict",
-    "statusCode": 409
+    "message": "Invalid solution or location",
+    "error": "Unprocessable Entity",
+    "statusCode": 422
 }
 ```
 
@@ -468,7 +565,7 @@ Authorization: Bearer <access token>
 
 Get leaderboard list
 
-**Query**
+**Query params**
 
 * `size` - int, 1-100 (default 10)
 * `city` - string, (default empty)
