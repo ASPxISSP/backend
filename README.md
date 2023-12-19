@@ -345,6 +345,7 @@ Authorization: Bearer <access token>
         "city": "Wrocław",
         "imageUri": "prisma-erd.svg",
         "puzzleOrder": 1,
+        "isSolved": true,
         "isUnlocked": true
     },
     {
@@ -357,6 +358,7 @@ Authorization: Bearer <access token>
         "city": "Wrocław",
         "imageUri": "adios.png",
         "puzzleOrder": 2,
+        "isSolved": false,
         "isUnlocked": true
     },
     {
@@ -369,6 +371,7 @@ Authorization: Bearer <access token>
         "city": "Wrocław",
         "imageUri": "rynek.svg",
         "puzzleOrder": 3,
+        "isSolved": false,
         "isUnlocked": false
     }
 ]
