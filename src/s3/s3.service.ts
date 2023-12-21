@@ -58,7 +58,9 @@ export class S3Service {
         const filteredObjects = (response.Contents || []).filter(
             (obj) => obj.Key !== folderPath,
         );
-        return filteredObjects.map(({ Key }) => ({ Key }));
+        return filteredObjects.map(({ Key }) => ({
+            Key: Key.replace(folderPath, ''),
+        }));
     }
 
     async objectExists(key: string): Promise<boolean> {

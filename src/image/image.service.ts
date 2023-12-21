@@ -23,7 +23,10 @@ export class ImageService {
             avatarKeys.map(async ({ Key }) => {
                 return {
                     name: Key,
-                    url: await this.s3Service.getObjectUrl(Key, false),
+                    url: await this.s3Service.getObjectUrl(
+                        'avatars/' + Key,
+                        false,
+                    ),
                 };
             }),
         );
