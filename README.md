@@ -12,6 +12,7 @@
     - [User](#user)
     - [Puzzle](#puzzle)
     - [Leaderboard](#leaderboard)
+    - [Image](#image)
 
 ## About
 This is the backend repository for RegGraTer project, made using [Nest](https://github.com/nestjs/nest) framework for TypeScript.
@@ -79,6 +80,14 @@ Register new user
     "message": <error message> | [<error messages>],
     "error": <error>,
     "statusCode": 400
+}
+```
+
+* **409** - conflict
+```json
+{
+    "message": "User already exists",
+    "statusCode": 409
 }
 ```
 
@@ -591,6 +600,81 @@ Get leaderboard list
         "imageId": 0
     }
 ]
+```
+
+</details>
+
+### Image
+
+<details>
+<summary><strong><code>GET /image/avatar</code></strong></summary>
+
+<br/>
+
+Get list of avatars
+
+**Response**
+
+* **200**
+```json
+[
+    {
+        "name": "adios.png",
+        "url": "https://zpp-bucket.s3.eu-central-1.amazonaws.com/avatars/adios.png"
+    },
+    {
+        "name": "pan_puzel.png",
+        "url": "https://zpp-bucket.s3.eu-central-1.amazonaws.com/avatars/pan_puzel.png"
+    },
+    {
+        "name": "pani_puzel.png",
+        "url": "https://zpp-bucket.s3.eu-central-1.amazonaws.com/avatars/pani_puzel.png"
+    }
+]
+```
+
+</details>
+
+<details>
+<summary><strong><code>GET /image/avatar/:key</code></strong></summary>
+
+<br/>
+
+Get single avatar by key
+
+**Params**
+* `key` - key of the resource, based on `imageUri` columns in database, which corresponds to object Key in S3 bucket
+
+**Response**
+
+* **200**
+```json
+{
+        "name": "adios.png",
+        "url": "https://zpp-bucket.s3.eu-central-1.amazonaws.com/avatars/adios.png"
+}
+```
+
+</details>
+
+<details>
+<summary><strong><code>GET /image/puzzle/:key</code></strong></summary>
+
+<br/>
+
+Get single puzzle by key. Returned `url` prop is a signed resource url valid for 1h
+
+**Params**
+* `key` - key of the resource, based on `imageUri` columns in database, which corresponds to object Key in S3 bucket
+
+**Response**
+
+* **200**
+```json
+{
+    "name": "prisma-erd.svg",
+    "url": "https://zpp-bucket.s3.eu-central-1.amazonaws.com/puzzles/prisma-erd.svg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAZPQRBDIY352F75GP%2F20231222%2Feu-central-1%2Fs3%2Faws4_request&X-Amz-Date=20231222T105613Z&X-Amz-Expires=3600&X-Amz-Signature=fdb3836dd5bee68c5191dff08d73a0b5abd2c37a59a630ba764990ccc5531d28&X-Amz-SignedHeaders=host&x-id=GetObject"
+}
 ```
 
 </details>
