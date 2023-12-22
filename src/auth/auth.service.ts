@@ -2,6 +2,7 @@ import {
     Injectable,
     UnauthorizedException,
     BadRequestException,
+    ConflictException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
@@ -50,7 +51,7 @@ export class AuthService {
     async register(user: CreateUserDto) {
         const existingUser = await this.userService.findById(user.email);
         if (existingUser) {
-            throw new BadRequestException('User already exists');
+            throw new ConflictException('User already exists');
         }
         const hashedPassword = await bcrypt.hash(user.password, 10);
         await this.userService.createUser({
