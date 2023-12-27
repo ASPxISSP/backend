@@ -43,6 +43,7 @@ export class UserController {
     @HttpCode(HttpStatus.OK)
     @Get('/puzzles')
     puzzleSolves(@Req() req, @Query('city') city?: string) {
-        return this.userService.puzzleSolves(req.user.id, city);
+        const cityParam = city ? decodeURIComponent(city) : undefined;
+        return this.userService.puzzleSolves(req.user.id, cityParam);
     }
 }

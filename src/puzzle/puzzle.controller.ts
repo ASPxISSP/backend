@@ -32,7 +32,8 @@ export class PuzzleController {
     @HttpCode(HttpStatus.OK)
     findMany(@Query(ValidationPipe) query: FindManyQueryDto) {
         const { page, size, city } = query;
-        return this.puzzleService.findMany(page, size, city);
+        const cityParam = city ? decodeURIComponent(city) : undefined;
+        return this.puzzleService.findMany(page, size, cityParam);
     }
 
     @Post(':id/solve')
