@@ -49,7 +49,7 @@ export class AuthService {
     }
 
     async register(user: CreateUserDto) {
-        const existingUser = await this.userService.findById(user.email);
+        const existingUser = await this.userService.findByEmail(user.email);
         if (existingUser) {
             throw new ConflictException('User already exists');
         }
