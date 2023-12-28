@@ -148,7 +148,7 @@ export class UserService {
                             END) OVER (ORDER BY "Puzzle"."puzzleOrder") AS "prev_isSolved"
                         FROM "Puzzle"
                         LEFT JOIN "UserPuzzleSolve" ON "UserPuzzleSolve"."puzzleId" = "Puzzle"."id"
-                        WHERE "Puzzle"."city" = 'Wrocław'
+                        WHERE "Puzzle"."city" = ${city}
                     )
                 SELECT
                     "id",
@@ -163,8 +163,7 @@ export class UserService {
                     "isSolved",
                     CASE
                         WHEN "isSolved" = FALSE
-                        AND "prev_isSolved" = TRUE THEN TRUE
-                        -- WHEN "true_count" = 0 THEN TRUE
+                        AND "prev_isSolved" = TRUE OR "prev_isSolved" IS NULL THEN TRUE
                         ELSE "isSolved"
                     END AS "isUnlocked"
                 FROM
