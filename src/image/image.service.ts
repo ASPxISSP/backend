@@ -37,7 +37,7 @@ export class ImageService {
         try {
             return {
                 name: key,
-                url: await this.s3Service.getSignedUrl('puzzles/' + key),
+                url: await this.s3Service.getSignedUrl('puzzles/' + key, 12 * 3600),
             };
         } catch (err) {
             throw new NotFoundException();
