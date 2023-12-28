@@ -308,7 +308,7 @@ Authorization: Bearer <access token>
 </details>
 
 <details>
-<summary><strong><code>GET /user/puzzle</code></strong></summary>
+<summary><strong><code>GET /user/puzzles</code></strong></summary>
 
 <br/>
 
