@@ -23,6 +23,7 @@ model User {
 model Puzzle {
   id          Int     @id @default(autoincrement())
   solution    String
+  tip         String
   difficulty  Difficulty
   latitude    Float
   longitude   Float
