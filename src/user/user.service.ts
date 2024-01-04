@@ -9,10 +9,14 @@ import { Prisma, Puzzle, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserProfileDto } from './dto/profile.dto';
 import { UserPuzzleDto } from './dto/user-puzzle.dto';
+import { S3Service } from 'src/s3/s3.service';
 
 @Injectable()
 export class UserService {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly s3Service: S3Service,
+    ) {}
 
     async findById(id: string): Promise<User | null> {
         return this.prisma.user.findUnique({
@@ -110,8 +114,9 @@ export class UserService {
             throw new ForbiddenException();
         }
 
+        let puzzles: Puzzle[] | UserPuzzleDto[];
         if (!city) {
-            return this.prisma.puzzle.findMany({
+            puzzles = await this.prisma.puzzle.findMany({
                 where: {
                     PuzzleSolve: {
                         some: {
@@ -124,7 +129,7 @@ export class UserService {
                 },
             });
         } else {
-            return this.prisma.$queryRaw`
+            puzzles = await this.prisma.$queryRaw`
                 WITH "UserPuzzleSolve" AS(
                         SELECT
                             "PuzzleSolve"."puzzleId",
@@ -172,5 +177,11 @@ export class UserService {
                     "puzzleOrder" ASC;
                 `;
         }
+        for (const puzzle of puzzles) {
+            puzzle.imageUri = await this.s3Service.getSignedUrl(
+                'puzzles/' + puzzle.imageUri,
+            );
+        }
+        return puzzles;
     }
 }

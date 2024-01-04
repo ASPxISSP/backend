@@ -13,10 +13,14 @@ import { FindManyResponseDto } from './dto/find-many.dto';
 import { PuzzleSolutionDto } from './dto/puzzle-solution.dto';
 import { isWithinRadius } from 'src/helpers/isWithinRadius';
 import { puzzleScore } from 'src/constants/puzzle-score';
+import { S3Service } from 'src/s3/s3.service';
 
 @Injectable()
 export class PuzzleService {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly s3Service: S3Service,
+    ) {}
 
     async findOne(id: number): Promise<Puzzle> {
         try {
@@ -28,6 +32,11 @@ export class PuzzleService {
             if (!puzzle) {
                 throw new NotFoundException();
             }
+            console.log(puzzle);
+            const signedUrl = await this.s3Service.getSignedUrl(
+                'puzzles/' + puzzle.imageUri,
+            );
+            puzzle.imageUri = signedUrl;
             return puzzle;
         } catch (err) {
             if (err instanceof NotFoundException) {
@@ -65,6 +74,11 @@ export class PuzzleService {
                 }),
             ]);
 
+            for (const puzzle of puzzles) {
+                puzzle.imageUri = await this.s3Service.getSignedUrl(
+                    'puzzles/' + puzzle.imageUri,
+                );
+            }
             return {
                 data: puzzles,
                 meta: {
