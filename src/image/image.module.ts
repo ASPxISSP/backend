@@ -6,6 +6,7 @@ import { S3Module } from 'src/s3/s3.module';
 @Module({
     imports: [S3Module],
     providers: [ImageService],
+    exports: [ImageService],
     controllers: [ImageController],
 })
 export class ImageModule {}

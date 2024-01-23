@@ -13,13 +13,13 @@ import { FindManyResponseDto } from './dto/find-many.dto';
 import { PuzzleSolutionDto } from './dto/puzzle-solution.dto';
 import { isWithinRadius } from 'src/helpers/isWithinRadius';
 import { puzzleScore } from 'src/constants/puzzle-score';
-import { S3Service } from 'src/s3/s3.service';
+import { ImageService } from 'src/image/image.service';
 
 @Injectable()
 export class PuzzleService {
     constructor(
         private readonly prisma: PrismaService,
-        private readonly s3Service: S3Service,
+        private readonly imageService: ImageService,
     ) {}
 
     async findOne(id: number): Promise<Puzzle> {
@@ -32,11 +32,17 @@ export class PuzzleService {
             if (!puzzle) {
                 throw new NotFoundException();
             }
-            console.log(puzzle);
-            const signedUrl = await this.s3Service.getSignedUrl(
-                'puzzles/' + puzzle.imageUri,
-            );
-            puzzle.imageUri = signedUrl;
+            let puzzleImageUrl: string | null;
+            try {
+                const puzzleImage = await this.imageService.getPuzzleImage(
+                    puzzle.imageUri,
+                );
+                puzzleImageUrl = puzzleImage.url;
+            } catch (err) {
+                console.log(err);
+                puzzleImageUrl = null;
+            }
+            puzzle.imageUri = puzzleImageUrl;
             return puzzle;
         } catch (err) {
             if (err instanceof NotFoundException) {
@@ -75,9 +81,17 @@ export class PuzzleService {
             ]);
 
             for (const puzzle of puzzles) {
-                puzzle.imageUri = await this.s3Service.getSignedUrl(
-                    'puzzles/' + puzzle.imageUri,
-                );
+                let puzzleImageUrl: string | null;
+                try {
+                    const puzzleImage = await this.imageService.getPuzzleImage(
+                        puzzle.imageUri,
+                    );
+                    puzzleImageUrl = puzzleImage.url;
+                } catch (err) {
+                    console.log(err);
+                    puzzleImageUrl = null;
+                }
+                puzzle.imageUri = puzzleImageUrl;
             }
             return {
                 data: puzzles,

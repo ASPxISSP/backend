@@ -9,13 +9,13 @@ import { Prisma, Puzzle, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserProfileDto } from './dto/profile.dto';
 import { UserPuzzleDto } from './dto/user-puzzle.dto';
-import { S3Service } from 'src/s3/s3.service';
+import { ImageService } from 'src/image/image.service';
 
 @Injectable()
 export class UserService {
     constructor(
         private readonly prisma: PrismaService,
-        private readonly s3Service: S3Service,
+        private readonly imageService: ImageService,
     ) {}
 
     async findById(id: string): Promise<User | null> {
@@ -96,11 +96,21 @@ export class UserService {
             throw new NotFoundException();
         }
         const { email, name, imageUri, score } = user;
+
+        let avatarImageUrl: string | null;
+        try {
+            const avatarImage = await this.imageService.getAvatar(imageUri);
+            avatarImageUrl = avatarImage.url;
+        } catch (err) {
+            console.log(err);
+            avatarImageUrl = null;
+        }
+
         return {
             id,
             email,
             name,
-            imageUri,
+            imageUri: avatarImageUrl,
             score,
         };
     }
@@ -178,9 +188,17 @@ export class UserService {
                 `;
         }
         for (const puzzle of puzzles) {
-            puzzle.imageUri = await this.s3Service.getSignedUrl(
-                'puzzles/' + puzzle.imageUri,
-            );
+            let puzzleImageUrl: string;
+            try {
+                const puzzleImage = await this.imageService.getPuzzleImage(
+                    puzzle.imageUri,
+                );
+                puzzleImageUrl = puzzleImage.url;
+            } catch (err) {
+                console.log(err);
+                puzzleImageUrl = null;
+            }
+            puzzle.imageUri = puzzleImageUrl;
         }
         return puzzles;
     }

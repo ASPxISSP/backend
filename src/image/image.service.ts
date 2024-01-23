@@ -13,7 +13,7 @@ export class ImageService {
                 url: await this.s3Service.getObjectUrl('avatars/' + key),
             };
         } catch (err) {
-            throw new NotFoundException();
+            throw new NotFoundException('Image not found');
         }
     }
 
@@ -40,7 +40,7 @@ export class ImageService {
                 url: await this.s3Service.getSignedUrl('puzzles/' + key, 12 * 3600),
             };
         } catch (err) {
-            throw new NotFoundException();
+            throw new NotFoundException('Image not found');
         }
     }
 }
