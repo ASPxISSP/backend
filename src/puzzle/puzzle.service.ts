@@ -32,7 +32,7 @@ export class PuzzleService {
             if (!puzzle) {
                 throw new NotFoundException();
             }
-            let puzzleImageUrl: string | null;
+            let puzzleImageUrl: string;
             try {
                 const puzzleImage = await this.imageService.getPuzzleImage(
                     puzzle.imageUri,
@@ -40,7 +40,7 @@ export class PuzzleService {
                 puzzleImageUrl = puzzleImage.url;
             } catch (err) {
                 console.log(err);
-                puzzleImageUrl = null;
+                puzzleImageUrl = await this.imageService.imageNotFound();
             }
             puzzle.imageUri = puzzleImageUrl;
             return puzzle;
@@ -81,7 +81,7 @@ export class PuzzleService {
             ]);
 
             for (const puzzle of puzzles) {
-                let puzzleImageUrl: string | null;
+                let puzzleImageUrl: string;
                 try {
                     const puzzleImage = await this.imageService.getPuzzleImage(
                         puzzle.imageUri,
@@ -89,7 +89,7 @@ export class PuzzleService {
                     puzzleImageUrl = puzzleImage.url;
                 } catch (err) {
                     console.log(err);
-                    puzzleImageUrl = null;
+                    puzzleImageUrl = await this.imageService.imageNotFound();
                 }
                 puzzle.imageUri = puzzleImageUrl;
             }

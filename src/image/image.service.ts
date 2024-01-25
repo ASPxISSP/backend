@@ -43,4 +43,13 @@ export class ImageService {
             throw new NotFoundException('Image not found');
         }
     }
+
+    async imageNotFound(): Promise<string> {
+        try {
+            return await this.s3Service.getObjectUrl('avatars/not-found.jpg');
+        } catch (err) {
+            console.log(err);
+            return '';
+        }
+    }
 }
